@@ -1,0 +1,174 @@
+---
+author: "Michael Paris"
+title: "Final Project - Alzheimer's Disease"
+date: March 2, 2021
+output:
+  word_document:
+bibliography: bibliography.bib
+---
+
+```{r include=FALSE}
+knitr::opts_chunk$set(comment = NA)
+library(bibtex)
+library(ggplot2)
+library(dplyr)
+library(caTools)
+setwd("C:/Users/mpari/OneDrive/DSC520/dsc520/data")
+healthyAging_df <- read.csv("final/Alzheimer_s_Disease_and_Healthy_Aging_Data.csv")
+causeOfDeath_df <- read.csv("final/Weekly_counts_of_death_by_jurisdiction_and_cause_of_death_Processed.csv")
+causeOfDeath_df <- subset(causeOfDeath_df, causeOfDeath_df$Cause.Group == "Alzheimer disease and dementia")
+pop_df <- read.csv("final/nst_est2019.csv")
+oasis_df <- read.csv("final/oasis_longitudinal.csv")
+oasis_df$M.F <- as.factor(oasis_df$M.F)
+oasis_df$Group <- as.factor(oasis_df$Group)
+
+oasis_df$M.F <- as.factor(oasis_df$M.F)
+oasis_df$Group <- as.factor(oasis_df$Group)
+oasis_df$SES <- as.factor(oasis_df$SES)
+oasis_df$CDR <- as.factor(oasis_df$CDR)
+
+diagnosis <- oasis_df$Group
+mr_delay <- oasis_df$MRI.ID
+m_f <- oasis_df$M.F
+age <- oasis_df$Age
+educ <- oasis_df$EDUC
+ses <- oasis_df$SES
+mmse <- oasis_df$MMSE
+CDR <- oasis_df$CDR
+eTIV <- oasis_df$eTIV
+nWBV <- oasis_df$nWBV
+ASF <- oasis_df$ASF
+```
+
+# Introduction
+
+|   Dementia is defined as a decline in mental ability severe enough to interfere with daily life.  Alzheimer's is a degenerative brain disease that is caused by complex brain changes following cell damage.  It leads to dementia symptoms that gradually worsen over time.[@alzheimersdiseaseanddementia]  Two of my grandparents died with several of the signs of dementia, but never had a diagnosis of Alzheimer's disease.  
+
+|   In this analysis, we'll discuss several research questions and attempt to glean some incites from the data.
+
+* What are the main risk factors for developing this disease?
+* Are there any secondary risk factors?
+* Is Alzheimer's disease becoming more common?
+* Is it possible to predict who might develop this disease?
+
+|   To answer these questions, we'll perform an analysis of the data to determine significant correlation between risk factors in order to determine which factors may be considered major versus minor.  If the data is available, a similar approach will be taken to determine if there is a correlation within families.  To determine if different ethnicities are more or less at risk, analyzing positive cases as a percent of the total ethnic population will be reviewed.
+
+
+|   To determine if the disease is becoming more common, I plan to plot the positive diagnosis numbers against the general population over time to see if variables are increasing at similar rates or if they are not connected.  With the information above, we may be able to show which groups are more at risk of developing the disease.
+
+# Datasets
+
+|   The datasets we will analyze are listed below:
+
+* Weekly counts of death by jurisdiction and cause of death
+** Center for Disease Control
+** https://healthdata.gov/dataset/weekly-counts-death-jurisdiction-and-cause-death
+** Updated February 17, 2021
+** 334K records, 15 columns 
+
+* Population, Population Change, and Estimated Components of Population Change: April 1, 2010 to July 1, 2019 (NST-EST2019-alldata)
+** United States Census Bureau
+** https://www2.census.gov/programs-surveys/popest/datasets/2010-2019/national/totals/nst-est2019-alldata.csv
+
+* ACS Demographic and Housing Estimates
+** United States Census Bureau
+** https://data.census.gov/cedsci/table?q=demographics&tid=ACSDP1Y2019.DP05&hidePreview=false 
+
+* Alzheimer's Disease and Healthy Aging Data
+** Center for Disease Control
+** https://healthdata.gov/dataset/alzheimers-disease-and-healthy-aging-data
+** Updated January 20, 2021
+** 144k records, 39 columns
+
+* Oasis MRI Demographics Data
+** Oasis
+** https://www.oasis-brains.org/
+
+
+# Data Cleanup
+For the  weekly count of death by jurisdiction and cause of death, we have performed several operations on the dataset.  The first step in the cleanup we removed rows that contained estimated deaths for a specific time period while keeping the rows of actual death data.  In step two, we combined weekly data into a single row representing each year.
+
+```{r, echo=FALSE}
+knitr::kable(head(causeOfDeath_df))
+```
+
+
+For the population dataset, we reduced the number of columns to match the same years for the death data.  Years 2015 through 2019.  We removed data for year 2020 as it was only a partial year's worth of data.
+
+```{r, echo=FALSE}
+knitr::kable(head(pop_df))
+```
+
+For the Oasis data, several of the columns needed to be changed from character over to factors including columns such as Male/Female and Group.  Columns that were not pertinent to the anslysis were also removed.  These columns included hand, subject.id, and MRI.Id.  The column hand was removed as all of the patients in the dataset were right handed.
+
+```{r, echo=FALSE}
+knitr::kable(head(oasis_df))
+```
+
+Group     Non-Demented, Demented  
+EDUC      Years of education
+SES       Socioeconomic Status
+MMSE	    Mini Mental State Examination
+CDR       Clinical Dementia Rating
+eTIV	    Estimated Total Intracranial Volume
+nWBV	    Normalize Whole Brain Volume
+ASF       Atlas Scaling Factor
+
+
+
+# Technical Libraries
+
+These are the libraries used in the analysis.
+
+* library(bibtex)     Package used to create bibliopgrahies
+* library(ggplot2)    Package used to create graphics
+* library(dplyr)      Package used for data manipulation
+* library(caTools)    Package containing utility functions
+
+
+
+# Graphs
+
+
+```{r, echo=FALSE}
+ggplot(causeOfDeath_df, aes(Year, Number.of.Deaths)) + geom_bar(stat = "identity", aes(fill = Cause.Group), position = "dodge") + 
+  geom_smooth(method = "lm") + xlab("Year") + ylab("Nbr of Deaths") + ggtitle("Major Causes of Death, US") + 
+  theme(plot.title = element_text(hjust = .5))
+
+ggplot(causeOfDeath_df, aes(Year, Number.of.Deaths)) + geom_bar(stat = "Identity", fill = "DarkBlue") + 
+  geom_smooth(method = "lm") + xlab("Year") + ylab("Nbr of Deaths") + ggtitle("Alzheimer's Deaths, US") + 
+  theme(plot.title = element_text(hjust = .5))
+```
+
+From 2015 through 2019, there has been an increase in deaths from Alzheimer's disease of just over 25%.  Over the same period, the population of the United States grew at a rate of just over 3%.  Does this by itself suggest that instances of Alzheimer's are increasing or could it indicate that doctors are able to diagnose the disease with more accuracy?
+
+
+I believe the Oasis MRI dataset is the most interesting of the group, so we'll spend some time analyzing it.
+
+We can see the average age for each degree of CDR Scoring table is relatively close, but there is a definate difference in the median age relative to the interquartile range.
+
+```{r, echo=FALSE}
+ggplot(oasis_df, aes(CDR, Age)) + geom_boxplot(col = "DarkBlue") + ggtitle("Degree of CDR by Age")+
+  xlab("CDR") + theme(plot.title = element_text(hjust = .5))
+```
+
+
+From the Oasis MRI dataset, we can see that more men than women were afflicted with the disease.
+
+```{r, echo=FALSE}
+ggplot(oasis_df, aes(Group)) + geom_bar(aes(fill=M.F)) + xlab("Group") + ylab("Number of Patients") + ggtitle("Dementia in Males vs. Females") + 
+   theme(plot.title = element_text(hjust = .5))
+```
+
+
+# Modeling the Oasis Data
+
+```{r, echo=FALSE}
+glm.fit <- glm(diagnosis ~ m_f + age + educ + ses + mmse + CDR + eTIV + nWBV + ASF, family = "binomial")
+
+summary(glm.fit)
+```
+
+From the summary of the model's fit, we can see that there are two statistically significant variables: Socioeconomic status (ses) and Mini-Mental State Examination (mmse).  Socioeconomic status (ses) was really surprising to me that it had such a high level of significance.  What would drive this variable to be significant?  This finding would suggest that additional study around this variable would be warranted.  Could it be lack of regular medical care, diet, or other factors such as smoking?  
+
+
