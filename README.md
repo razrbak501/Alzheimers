@@ -1,5 +1,5 @@
 # Alzheimers
-Dementia is defined as a decline in mental ability severe enough to interfere with daily life. Alzheimer’s is a degenerative brain disease that is caused by complex brain changes following cell damage. It leads to dementia symptoms that gradually worsen over time. (“Dementia Vs. Alzheimer’s Disease: What Is the Difference?” n.d.) Two of my grandparents died with several of the signs of dementia but never had a diagnosis of Alzheimer’s disease.
+Dementia is defined as a decline in mental ability severe enough to interfere with daily life. Alzheimer’s is a degenerative brain disease that is caused by complex brain changes following cell damage. It leads to dementia symptoms that gradually worsen over time. (“Dementia Vs. Alzheimer’s Disease: What Is the Difference?” n.d.) Two of my grandparents died with several of the signs of dementia but never had a diagnosis of Alzheimer’s disease. <br>
   In this analysis, we’ll discuss several research questions and attempt to glean some incites from the data.
 •	What are the main risk factors for developing this disease?
 •	Are there any secondary risk factors?
